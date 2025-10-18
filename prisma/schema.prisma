@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(cuid())
+  name        String?
+  email       String?       @unique
+  image       String?
+  password    String?
+  provider    AuthProvider? @default(CREDENTIALS)
+  memberships Membership[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Workspace   Workspace[]
+}
+
+enum AuthProvider {
+  CREDENTIALS
+  GITHUB
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id])
+  memberships Membership[]
+  pages       Page[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Membership {
+  id          String        @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        WorkspaceRole @default(MEMBER)
+  user        User          @relation(fields: [userId], references: [id])
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+
+  @@unique([userId, workspaceId])
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Page {
+  id          String    @id @default(cuid())
+  title       String
+  icon        String?
+  coverImage  String?
+  data        Json?
+  workspaceId String
+  isArchived  Boolean   @default(false)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
