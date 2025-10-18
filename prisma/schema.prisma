@@ -31,7 +31,7 @@ enum AuthProvider {
 model Workspace {
   id          String       @id @default(cuid())
   name        String
-  slug        String       @unique
+  slug        String       @unique @default(cuid())
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id])
   memberships Membership[]

@@ -3,6 +3,7 @@ import { z } from "zod";
 import axios from "axios";
 import { prisma } from "../../lib/prisma";
 import { env } from "../../variables/env";
+import jwt from "jsonwebtoken";
 
 export default async function AuthGithubController(
   req: FastifyRequest,
@@ -79,7 +80,17 @@ export default async function AuthGithubController(
     },
   });
 
-  if (!user) {
+  if (user) {
+    user = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        name: userInfo.name,
+        image: userInfo.avatar_url,
+      },
+    });
+  } else {
     user = await prisma.user.create({
       data: {
         email: userInfo.email,
@@ -90,29 +101,9 @@ export default async function AuthGithubController(
     });
   }
 
-  if (user) {
-    user = await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        email: userInfo.email,
-        name: userInfo.name,
-        image: userInfo.avatar_url,
-        provider: "GITHUB",
-      },
-    });
-  }
-
-  const token = await res.jwtSign(
-    {},
-    {
-      sign: {
-        sub: user.id,
-        expiresIn: "30d",
-      },
-    },
-  );
+  const token = jwt.sign({ sub: user.id }, env.JWT_KEY, {
+    expiresIn: "30d",
+  });
 
   return res
     .setCookie("refreshToken", token, {
@@ -121,5 +112,5 @@ export default async function AuthGithubController(
       sameSite: true,
       httpOnly: true,
     })
-    .redirect(env.HOST_WEB);
+    .redirect("http://localhost:3000");
 }

@@ -2,6 +2,8 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { env } from "../../variables/env";
 
 export default async function AuthRegisterController(
   req: FastifyRequest,
@@ -36,8 +38,8 @@ export default async function AuthRegisterController(
     },
   });
 
-  const token = await res.jwtSign({
-    sub: user.id,
+  const token = jwt.sign({ sub: user.id }, env.JWT_KEY, {
+    expiresIn: "7d",
   });
 
   return res

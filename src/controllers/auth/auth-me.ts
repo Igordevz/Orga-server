@@ -1,11 +1,12 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { prisma } from "../../lib/prisma";
+import z from "zod";
 
 export default async function AuthMeController(
   req: FastifyRequest,
   res: FastifyReply,
 ) {
-  const { sub } = req.user;
+  const { sub } = req.user as { sub: string };
 
   const user = await prisma.user.findUnique({
     where: {
