@@ -27,7 +27,7 @@ export default async function AuthRegisterController(
   const hashedPassword = await bcrypt.hash(password, saltHash);
 
   if (validateEmailExist) {
-    return res.status(400).send({ message: "Email already exists" });
+    return res.status(400).send({ message: "E-mail já cadastrado" });
   }
 
   const user = await prisma.user.create({
@@ -50,5 +50,5 @@ export default async function AuthRegisterController(
       httpOnly: true,
     })
     .status(201)
-    .send({ message: "User created successfully" });
+    .send({ message: "Usuário criado com sucesso" });
 }

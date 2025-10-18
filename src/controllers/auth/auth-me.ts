@@ -15,7 +15,7 @@ export default async function AuthMeController(
   });
 
   if (!user) {
-    return res.status(404).send({ message: "User not found" });
+    return res.status(404).send({ message: "Usuário não encontrado" });
   }
 
   return res.send({ user });

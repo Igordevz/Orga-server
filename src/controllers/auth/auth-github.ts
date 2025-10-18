@@ -71,7 +71,7 @@ export default async function AuthGithubController(
   if (!userInfo.email) {
     return res
       .status(400)
-      .send({ message: "Could not retrieve email from GitHub" });
+      .send({ message: "Não foi possível obter o e-mail do GitHub" });
   }
 
   let user = await prisma.user.findUnique({
