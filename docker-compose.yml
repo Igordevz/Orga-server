@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:13
+    container_name: orga-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: orga
+    volumes:
+      - orga_data:/var/lib/postgresql/data
+    networks:
+      - orga_network
+
+volumes:
+  orga_data:
+    driver: local
+
+networks:
+  orga_network:
+    driver: bridge
