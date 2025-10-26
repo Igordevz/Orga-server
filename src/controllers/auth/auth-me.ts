@@ -12,6 +12,10 @@ export default async function AuthMeController(
     where: {
       id: sub,
     },
+    include: {
+      Workspace: true,
+      memberships: true,
+    },
   });
 
   if (!user) {
