@@ -62,7 +62,7 @@ model Page {
   title       String
   icon        String?
   coverImage  String?
-  data        Json?
+  data        String?
   workspaceId String
   isArchived  Boolean   @default(false)
   workspace   Workspace @relation(fields: [workspaceId], references: [id])

@@ -12,13 +12,13 @@ export async function workSpaceRouter(app: FastifyInstance) {
   );
 
   app.get(
-    "/:slug",
+    "/workspace/:slug",
     { preHandler: [validateToken] },
     GetSlugWorkspaceController,
   );
 
   app.put(
-    "/:slug",
+    "/workspace/:slug",
     { preHandler: [validateToken] },
     RenameWorkspaceController,
   );

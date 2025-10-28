@@ -13,7 +13,11 @@ export default async function AuthMeController(
       id: sub,
     },
     include: {
-      Workspace: true,
+      Workspace: {
+        include: {
+          pages: true,
+        },
+      },
       memberships: true,
     },
   });

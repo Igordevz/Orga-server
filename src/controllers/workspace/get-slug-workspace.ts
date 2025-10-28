@@ -8,8 +8,6 @@ export default async function GetSlugWorkspaceController(
   const { slug } = req.params as { slug: string };
   const user = req.user;
 
-  console.log(user.sub);
-
   const workspace = await prisma.workspace.findUnique({
     where: {
       slug,
