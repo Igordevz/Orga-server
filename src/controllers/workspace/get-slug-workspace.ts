@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { workspaces } from "../../db/schema";
+import { eq } from "drizzle-orm";
 
 export default async function GetSlugWorkspaceController(
   req: FastifyRequest,
@@ -8,11 +10,9 @@ export default async function GetSlugWorkspaceController(
   const { slug } = req.params as { slug: string };
   const user = req.user;
 
-  const workspace = await prisma.workspace.findUnique({
-    where: {
-      slug,
-    },
-    include: {
+  const workspace = await db.query.workspaces.findFirst({
+    where: eq(workspaces.slug, slug),
+    with: {
       memberships: true,
       pages: true,
     },

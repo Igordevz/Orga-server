@@ -1,7 +1,9 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import axios from "axios";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { users } from "../../db/schema";
+import { eq } from "drizzle-orm";
 import { env } from "../../variables/env";
 import jwt from "jsonwebtoken";
 
@@ -73,31 +75,35 @@ export default async function AuthGithubController(
       .send({ message: "Não foi possível obter o e-mail do GitHub" });
   }
 
-  let user = await prisma.user.findUnique({
-    where: {
-      email: userInfo.email,
-    },
-  });
+  let [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, userInfo.email));
 
   if (user) {
-    user = await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
+    [user] = await db
+      .update(users)
+      .set({
         name: userInfo.name,
         image: userInfo.avatar_url,
-      },
-    });
+      })
+      .where(eq(users.id, user.id))
+      .returning();
   } else {
-    user = await prisma.user.create({
-      data: {
+    [user] = await db
+      .insert(users)
+      .values({
+        id: String(userInfo.id),
         email: userInfo.email,
         name: userInfo.name,
         image: userInfo.avatar_url,
         provider: "GITHUB",
-      },
-    });
+      })
+      .returning();
+  }
+
+  if (!user) {
+    throw new Error("Failed to retrieve or create user.");
   }
 
   const token = jwt.sign({ sub: user.id }, env.JWT_KEY, {

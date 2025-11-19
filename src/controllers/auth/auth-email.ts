@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import z from "zod";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { users } from "../../db/schema";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "../../variables/env";
@@ -19,11 +20,7 @@ export default async function AuthEmailController(
 
   const { email, password } = result.data;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
+  const [user] = await db.select().from(users).where(eq(users.email, email));
 
   if (!user) {
     return res.status(404).send({ message: "Usuário não encontrado" });

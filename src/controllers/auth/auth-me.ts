@@ -1,5 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { users } from "../../db/schema";
+import { eq } from "drizzle-orm";
 import z from "zod";
 
 export default async function AuthMeController(
@@ -8,16 +10,15 @@ export default async function AuthMeController(
 ) {
   const { sub } = req.user as { sub: string };
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: sub,
-    },
-    include: {
-      Workspace: {
-        include: {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, sub),
+    with: {
+      workspaces: {
+        with: {
           pages: true,
         },
       },
+      favoritePages: true,
       memberships: true,
     },
   });

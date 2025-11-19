@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
 import type { FastifyRequest } from "fastify";
 import z from "zod";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { pages } from "../../db/schema";
 
 export default async function createPagetoWork(req: FastifyRequest) {
   const schemaPage = z.object({
@@ -15,15 +17,17 @@ export default async function createPagetoWork(req: FastifyRequest) {
     req.body,
   );
 
-  const createpage = await prisma.page.create({
-    data: {
+  const [createpage] = await db
+    .insert(pages)
+    .values({
+      id: uuidv4(),
       title,
       icon,
       coverImage,
       data,
       workspaceId,
-    },
-  });
+    })
+    .returning();
 
   if (!createpage) {
     throw new Error("Erro ao criar página");

@@ -1,7 +1,8 @@
-
 import type { FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
-import { prisma } from "../../lib/prisma";
+import { db } from "../../db";
+import { workspaces } from "../../db/schema";
+import { eq } from "drizzle-orm";
 import { slugify } from "../../lib/slugify";
 
 export default async function RenameWorkspaceController(
@@ -17,41 +18,43 @@ export default async function RenameWorkspaceController(
 
   const { name } = renameWorkspaceSchema.parse(req.body);
 
-  const workspace = await prisma.workspace.findUnique({
-    where: {
-      slug,
-    },
-  });
+  const [workspace] = await db
+    .select()
+    .from(workspaces)
+    .where(eq(workspaces.slug, slug));
 
   if (!workspace) {
     return res.status(404).send({ error: "Workspace não encontrado" });
   }
 
   if (workspace.ownerId !== sub) {
-    return res.status(403).send({ error: "Você não é o proprietário deste workspace" });
+    return res
+      .status(403)
+      .send({ error: "Você não é o proprietário deste workspace" });
   }
 
   let newSlug = slugify(name);
-  let existingWorkspace = await prisma.workspace.findUnique({
-    where: { slug: newSlug },
-  });
+  let [existingWorkspace] = await db
+    .select()
+    .from(workspaces)
+    .where(eq(workspaces.slug, newSlug));
 
   while (existingWorkspace && existingWorkspace.id !== workspace.id) {
     newSlug = `${slugify(name)}-${Math.random().toString(36).substring(2, 7)}`;
-    existingWorkspace = await prisma.workspace.findUnique({
-      where: { slug: newSlug },
-    });
+    [existingWorkspace] = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.slug, newSlug));
   }
 
-  const updatedWorkspace = await prisma.workspace.update({
-    where: {
-      slug,
-    },
-    data: {
+  const [updatedWorkspace] = await db
+    .update(workspaces)
+    .set({
       name,
       slug: newSlug,
-    },
-  });
+    })
+    .where(eq(workspaces.slug, slug))
+    .returning();
 
   return res.send({
     workspace: updatedWorkspace,

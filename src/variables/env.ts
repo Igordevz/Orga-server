@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const env = z
   .object({
+    DATABASE_URL: z.string(),
     PORT: z.string().min(1).max(5),
     JWT_KEY: z.string().min(1),
     GITHUB_CLIENT_ID: z.string().min(1),
