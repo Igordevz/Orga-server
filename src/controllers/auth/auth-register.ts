@@ -5,17 +5,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "../../variables/env";
 
+import { authRegisterSchema } from "../../schemas/auth-register-schema";
+
 export default async function AuthRegisterController(
   req: FastifyRequest,
   res: FastifyReply,
 ) {
-  const userSchema = z.object({
-    name: z.string().min(2).max(100),
-    password: z.string().min(8).max(100),
-    email: z.email(),
-  });
-
-  const { name, password, email } = await userSchema.parseAsync(req.body);
+  const { name, password, email } = await authRegisterSchema.parseAsync(req.body);
 
   const validateEmailExist = await prisma.user.findUnique({
     where: {

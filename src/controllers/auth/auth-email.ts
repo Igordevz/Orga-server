@@ -5,16 +5,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "../../variables/env";
 
+import { authEmailSchema } from "../../schemas/auth-email-schema";
+
 export default async function AuthEmailController(
   req: FastifyRequest,
   res: FastifyReply,
 ) {
-  const userSchema = z.object({
-    email: z.email({ message: "Endereço de e-mail inválido" }),
-    password: z.string(),
-  });
-
-  const result = userSchema.safeParse(req.body);
+  const result = authEmailSchema.safeParse(req.body);
 
   if (!result.success) {
     return res.status(400).send({ errors: result.error.flatten().fieldErrors });
