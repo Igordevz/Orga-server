@@ -67,7 +67,6 @@ export default async function AuthGithubController(
       userInfo.email = primaryEmail.email;
     }
   }
-
   if (!userInfo.email) {
     return res
       .status(400)
