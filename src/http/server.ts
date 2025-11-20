@@ -13,7 +13,7 @@ app.register(fastifyCookie);
 app.register(fastifyCors, {
   origin: "http://localhost:3000",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 });
 
 app.register(RouterIndex);

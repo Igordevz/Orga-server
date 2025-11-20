@@ -1,8 +1,8 @@
-import type { FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { env } from "../variables/env";
 import jwt from "jsonwebtoken";
 
-export const validateToken = async (req: FastifyRequest) => {
+export const validateToken = async (req: FastifyRequest, rep: FastifyReply) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
@@ -15,9 +15,21 @@ export const validateToken = async (req: FastifyRequest) => {
     if (typeof decoded === "object" && decoded.sub) {
       req.user = { sub: decoded.sub };
     } else {
+      rep
+        .clearCookie("refreshToken")
+        .send({
+          error: "redirect",
+        })
+        .status(401);
       throw new Error("Token inválido");
     }
   } catch (error) {
+    rep
+      .clearCookie("refreshToken")
+      .send({
+        error: "redirect",
+      })
+      .status(401);
     throw new Error("Token inválido");
   }
 };
