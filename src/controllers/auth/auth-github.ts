@@ -117,5 +117,6 @@ export default async function AuthGithubController(
       sameSite: true,
       httpOnly: true,
     })
+    .send(token)
     .redirect("http://localhost:3000/workspaces");
 }
